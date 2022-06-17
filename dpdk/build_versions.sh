@@ -10,9 +10,9 @@
 #Email         	: Patrick.G.Kutch@Intel.com                                           
 ###################################################################
 
-DPDK_VERSIONS=("v19.11" "v20.02" "v20.05" "v20.08" "v20.11" "v21.02" "v21.05" "v21.11" "v22.03")
+DPDK_VERSIONS=("19.11" "20.02" "20.05" "20.08" "20.11" "21.02" "21.05" "21.11" "22.03")
 #if you only want to build a single image, then uncomment and do something like the following line
-#DPDK_VERSIONS=("v22.03")
+DPDK_VERSIONS=("20.11.1" "20.11.2" "20.11.3" "20.11.4" "20.11.5") 
 DOCKER_REPO="patrickkutch"
 IMAGE_NAME="dpdk"
 
@@ -29,15 +29,16 @@ fi
 #pick up proxy settings
 # I use no-cache to make sure I pick up latest repo
 # probably a more efficient way of doing this, but this works for now
-export Params="--no-cache --build-arg CONFIG_RTE_LIBRTE_IEEE1588=$COMPILE_WITH_PTP --build-arg http_proxy=$http_proxy --build-arg https_proxy=$http_proxy --build-arg HTTP_PROXY=$http_proxy --build-arg HTTPS_PROXY=$http_proxy --network=host"
+#export Params="--no-cache --build-arg CONFIG_RTE_LIBRTE_IEEE1588=$COMPILE_WITH_PTP --build-arg http_proxy=$http_proxy --build-arg https_proxy=$http_proxy --build-arg HTTP_PROXY=$http_proxy --build-arg HTTPS_PROXY=$http_proxy --network=host"
+export Params="--build-arg CONFIG_RTE_LIBRTE_IEEE1588=$COMPILE_WITH_PTP --build-arg http_proxy=$http_proxy --build-arg https_proxy=$http_proxy --build-arg HTTP_PROXY=$http_proxy --build-arg HTTPS_PROXY=$http_proxy --network=host"
 
 buildIt() {
     #echo docker build $Params --build-arg DPDK_VER=$dpdkVer --rm -t $DOCKER_REPO/$IMAGE_NAME:$dpdkVer .
-    docker build $Params --build-arg DPDK_VER=$dpdkVer --rm -t $DOCKER_REPO/$IMAGE_NAME:$dpdkVer .
+    docker build $Params --build-arg DPDK_VER=$dpdkVer --rm -t $DOCKER_REPO/$IMAGE_NAME:v$dpdkVer .
 }
  
 pushIt() {
-    docker push $DOCKER_REPO/$IMAGE_NAME:$dpdkVer
+    docker push $DOCKER_REPO/$IMAGE_NAME:v$dpdkVer
 }
 
 printVersions() {
@@ -60,8 +61,8 @@ fi
 for dpdkVer in "${DPDK_VERSIONS[@]}"
 do
     if [ "$doParallel" == "Y" ]; then # puild in parallel
-        nohup docker build $Params --build-arg DPDK_VER=$dpdkVer --rm -t $DOCKER_REPO/$IMAGE_NAME:$dpdkVer . && docker push $DOCKER_REPO/$IMAGE_NAME:$dpdkVer & 
-        echo "Spawning process to build and push $DOCKER_REPO/IMAGE_NAME:$dpdkVer"
+        nohup docker build $Params --build-arg DPDK_VER=$dpdkVer --rm -t $DOCKER_REPO/$IMAGE_NAME:v$dpdkVer . && docker push $DOCKER_REPO/$IMAGE_NAME:v$dpdkVer & 
+        echo "Spawning process to build and push $DOCKER_REPO/IMAGE_NAME:v$dpdkVer"
     else
         buildIt
         pushIt

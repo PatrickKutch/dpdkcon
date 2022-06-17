@@ -15,7 +15,7 @@ RUN chsh -s /usr/bin/bash \
     && echo "apt-get install linux-image-$(uname -r) -y" \
     && apt-get autoremove -y 
 
-RUN packages="build-essential git python python3 pciutils meson libnuma-dev vim netperf sudo htop ethtool bash-completion libtool iproute2 python3-pyelftools iputils-ping net-tools pkg-config cmake libpcap-dev" \
+RUN packages="build-essential git python python3 pciutils meson libnuma-dev vim netperf sudo htop ethtool bash-completion libtool iproute2 python3-pyelftools iputils-ping net-tools pkg-config cmake libpcap-dev wget" \
     && for i in $packages; do apt-get install --ignore-missing -y "$i"; done
 
 #Default DPDK Version to build, override with --build-arg DPDK_VERSION=20.04 or other
@@ -27,12 +27,19 @@ ARG CONFIG_RTE_LIBRTE_IEEE1588='0'
 LABEL DPDK_VERSION=${DPDK_VER}
 ENV RTE_SDK /root/dpdk
 
-# clone and install dpdk
+# download and install dpdk
 WORKDIR /root
-RUN git clone http://dpdk.org/git/dpdk
 
-WORKDIR /root/dpdk
-RUN git checkout ${DPDK_VER} \
+#RUN wget http://fast.dpdk.org/rel/dpdk-21.11.1.tar.xz
+# RUN wget http://fast.dpdk.org/rel/dpdk-$DPDK_VER.tar.xz \
+#         && tar xvf dpdk-$DPDK_VER.tar.xz -C /root/dpdk
+
+#WORKDIR /root/dpdk 
+#RUN git checkout ${DPDK_VER} \
+RUN wget http://fast.dpdk.org/rel/dpdk-$DPDK_VER.tar.xz \
+    && tar xvf dpdk-$DPDK_VER.tar.xz \
+    && mv dpdk-stable-$DPDK_VER dpdk \
+    && cd dpdk \
     # I might want PTP to be optionally compiled, so insert based on ARG
     && sed -i "/i40e/a #define CONFIG_RTE_LIBRTE_IEEE1588 $CONFIG_RTE_LIBRTE_IEEE1588" /root/dpdk/config/rte_config.h \
     && meson build \
