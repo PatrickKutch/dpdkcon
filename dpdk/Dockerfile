@@ -38,7 +38,8 @@ WORKDIR /root
 #RUN git checkout ${DPDK_VER} \
 RUN wget http://fast.dpdk.org/rel/dpdk-$DPDK_VER.tar.xz \
     && tar xvf dpdk-$DPDK_VER.tar.xz \
-    && mv dpdk-stable-$DPDK_VER dpdk \
+    # sometimes the directory name is not the same
+    && if [ -d dpdk-stable-$DPDK_VER ]; then mv dpdk-stable-$DPDK_VER dpdk; else mv dpdk-$DPDK_VER dpdk; fi \
     && cd dpdk \
     # I might want PTP to be optionally compiled, so insert based on ARG
     && sed -i "/i40e/a #define CONFIG_RTE_LIBRTE_IEEE1588 $CONFIG_RTE_LIBRTE_IEEE1588" /root/dpdk/config/rte_config.h \
