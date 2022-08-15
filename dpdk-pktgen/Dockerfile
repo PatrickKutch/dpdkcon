@@ -1,29 +1,19 @@
-# get base ubuntu image
-FROM ubuntu-base
+# get ubuntu image, from my other stuff, no reason to duplicate effort
+# change to get differnt version of dpdk, and change the version of pktgen
+FROM patrickkutch/dpdk:v21.11 
 
 # run docker image
-LABEL RUN docker run -it --name ubuntu-dpdk-pktgen-build
+LABEL RUN docker run -it --name dpdk-pktgen-build
 ENV RTE_SDK /root/dpdk
-
-# clone and install dpdk
-WORKDIR /root
-RUN git clone http://dpdk.org/git/dpdk 
-
-WORKDIR /root/dpdk
-RUN git checkout v21.11 \
-    && meson build \
-    && cd build \
-    && ninja \
-    && ninja install \
-    && ldconfig
 
 # clone and install dpdk-pktgen
 WORKDIR /root
 RUN apt-get install libpcap-dev -y \
-    && git clone http://dpdk.org/git/apps/pktgen-dpdk
+    && git clone https://github.com/pktgen/Pktgen-DPDK.git
 
-WORKDIR /root/pktgen-dpdk 
-RUN meson build \
+WORKDIR /root/Pktgen-DPDK 
+RUN git checkout pktgen-22.07.0 \
+    && meson build \
     && cd build \
     && ninja \
     && ninja install 
