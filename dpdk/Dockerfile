@@ -49,6 +49,13 @@ RUN wget http://fast.dpdk.org/rel/dpdk-$DPDK_VER.tar.xz \
     && ninja install \
     && ldconfig
 
+    # make it so devbind doesn't print errors -- begin
+RUN cd /usr/local/bin \    
+    && sed 's/"-Dvmmnnk"]/"-Dvmmnnk"],stderr=subprocess.PIPE/g' dpdk-devbind.py > dpdk-devbind.py.bak && mv dpdk-devbind.py.bak dpdk-devbind.py \
+    && sed 's/"-vmmks", dev_id]/"-vmmks", dev_id],stderr=subprocess.PIPE/g' dpdk-devbind.py > dpdk-devbind.py.bak && mv dpdk-devbind.py.bak dpdk-devbind.py \
+    && chmod +x dpdk-devbind.py \
+    && cd .. \
+
 WORKDIR /root
 COPY launcher.py /launcher.py
 RUN chmod +x /launcher.py
