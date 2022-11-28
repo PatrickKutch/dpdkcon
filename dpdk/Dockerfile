@@ -47,7 +47,11 @@ RUN wget http://fast.dpdk.org/rel/dpdk-$DPDK_VER.tar.xz \
     && cd build \
     && ninja \
     && ninja install \
-    && ldconfig
+    && ldconfig \
+    # clean up stuff we dont' need to save space
+    && ninja clean \
+    && cd ../.. \
+    && rm -f dpdk-$DPDK_VER.tar.xz
 
     # make it so devbind doesn't print errors -- begin
 RUN cd /usr/local/bin \    
