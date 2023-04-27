@@ -45,9 +45,13 @@ RUN wget http://fast.dpdk.org/rel/dpdk-$DPDK_VER.tar.xz \
     && sed -i "/i40e/a #define CONFIG_RTE_LIBRTE_IEEE1588 $CONFIG_RTE_LIBRTE_IEEE1588" /root/dpdk/config/rte_config.h \
     && meson build \
     && cd build \
+    # include all of the examples
+    && meson configure -Dexamples=all \ 
     && ninja \
     && ninja install \
     && ldconfig \
+    # copy examples to bin, so they are in the path
+    && mv examples/dpdk-* /usr/local/bin \
     # clean up stuff we dont' need to save space
     && ninja clean \
     && cd ../.. \
@@ -58,7 +62,8 @@ RUN cd /usr/local/bin \
     && sed 's/"-Dvmmnnk"]/"-Dvmmnnk"],stderr=subprocess.PIPE/g' dpdk-devbind.py > dpdk-devbind.py.bak && mv dpdk-devbind.py.bak dpdk-devbind.py \
     && sed 's/"-vmmks", dev_id]/"-vmmks", dev_id],stderr=subprocess.PIPE/g' dpdk-devbind.py > dpdk-devbind.py.bak && mv dpdk-devbind.py.bak dpdk-devbind.py \
     && chmod +x dpdk-devbind.py \
-    && cd .. \
+    && cd .. 
+
 
 WORKDIR /root
 COPY launcher.py /launcher.py
