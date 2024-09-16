@@ -1,8 +1,5 @@
 To build:
-export Params="--build-arg http_proxy=$http_proxy --build-arg https_proxy=$http_proxy --build-arg HTTP_PROXY=$http_proxy --build-arg HTTPS_PROXY=$http_proxy --network=host"
-# build docker image with latest DPDK using ubuntu-base image
-docker build $Params --no-cache --rm -t patrickkutch/dpdk-pktgen:v21.11 .
+make sure all the versions you want to use are properly set in the build_pktgen.sh file and run it! :-)
+export Params="--build-arg http_proxy=$http_proxy --build-arg https_proxy=$http_proxy --build-arg HTTP_
+To test the image run: docker run --privileged  --cap-add=ALL -v /sys/bus/pci/devices:/sys/bus/pci/devices -v /sys/kernel/mm/hugepages:/sys/kernel/mm/hugepages -v /sys/devices/system/node:/sys/devices/system/node -v /dev:/dev --name dpdk-pktgen -it patrickkutch/dpdk-pktgen:v24.07.1 pktgen
 
-To test the image run: docker run --privileged  --cap-add=ALL -v /sys/bus/pci/devices:/sys/bus/pci/devices -v /sys/kernel/mm/hugepages:/sys/kernel/mm/hugepages -v /sys/devices/system/node:/sys/devices/system/node -v /dev:/dev --name ubuntu-dpdk-pktgen -it patrickkutch/dpdk-pktgen:v21.11 bash
-
-There may be different versions as DPDK and pktgen progress.  Going to start with 21.11

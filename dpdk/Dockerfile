@@ -1,6 +1,6 @@
 # get base ubuntu image
 # I like ubuntu, easy to get packages
-FROM ubuntu:20.04
+FROM ubuntu:24.04
 
 
 # update repos and install required packages

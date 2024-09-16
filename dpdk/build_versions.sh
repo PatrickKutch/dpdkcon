@@ -12,7 +12,7 @@
 
 DPDK_VERSIONS=("19.11" "20.02" "20.05" "20.08" "20.11" "21.02" "21.05" "21.11" "22.03")
 #if you only want to build a single image, then uncomment and do something like the following line
-DPDK_VERSIONS=("20.11.1" "20.11.2" "20.11.3" "20.11.4" "20.11.5") 
+DPDK_VERSIONS=("24.07") 
 DOCKER_REPO="patrickkutch"
 IMAGE_NAME="dpdk"
 
@@ -29,11 +29,12 @@ fi
 #pick up proxy settings
 # I use no-cache to make sure I pick up latest repo
 # probably a more efficient way of doing this, but this works for now
-#export Params="--no-cache --build-arg CONFIG_RTE_LIBRTE_IEEE1588=$COMPILE_WITH_PTP --build-arg http_proxy=$http_proxy --build-arg https_proxy=$http_proxy --build-arg HTTP_PROXY=$http_proxy --build-arg HTTPS_PROXY=$http_proxy --network=host"
-export Params="--build-arg CONFIG_RTE_LIBRTE_IEEE1588=$COMPILE_WITH_PTP --build-arg http_proxy=$http_proxy --build-arg https_proxy=$http_proxy --build-arg HTTP_PROXY=$http_proxy --build-arg HTTPS_PROXY=$http_proxy --network=host"
+export Params="--no-cache --build-arg CONFIG_RTE_LIBRTE_IEEE1588=$COMPILE_WITH_PTP --build-arg http_proxy=$http_proxy --build-arg https_proxy=$http_proxy --build-arg HTTP_PROXY=$http_proxy --build-arg HTTPS_PROXY=$http_proxy --network=host"
+#export Params="--build-arg CONFIG_RTE_LIBRTE_IEEE1588=$COMPILE_WITH_PTP --build-arg http_proxy=$http_proxy --build-arg https_proxy=$http_proxy --build-arg HTTP_PROXY=$http_proxy --build-arg HTTPS_PROXY=$http_proxy --network=host"
 
 buildIt() {
-    #echo docker build $Params --build-arg DPDK_VER=$dpdkVer --rm -t $DOCKER_REPO/$IMAGE_NAME:$dpdkVer .
+    echo "Running Docker build..."
+    echo docker build $Params --build-arg DPDK_VER=$dpdkVer --rm -t $DOCKER_REPO/$IMAGE_NAME:$dpdkVer .
     docker build $Params --build-arg DPDK_VER=$dpdkVer --rm -t $DOCKER_REPO/$IMAGE_NAME:v$dpdkVer .
 }
  
