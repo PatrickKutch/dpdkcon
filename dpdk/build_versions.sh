@@ -10,9 +10,11 @@
 #Email         	: Patrick.G.Kutch@Intel.com                                           
 ###################################################################
 
+#build a bunch of them
 DPDK_VERSIONS=("19.11" "20.02" "20.05" "20.08" "20.11" "21.02" "21.05" "21.11" "22.03")
 #if you only want to build a single image, then uncomment and do something like the following line
-DPDK_VERSIONS=("20.11.1" "20.11.2" "20.11.3" "20.11.4" "20.11.5") 
+DPDK_VERSIONS=("24.11") 
+#my repo, select your own
 DOCKER_REPO="patrickkutch"
 IMAGE_NAME="dpdk"
 
@@ -30,14 +32,18 @@ fi
 # I use no-cache to make sure I pick up latest repo
 # probably a more efficient way of doing this, but this works for now
 #export Params="--no-cache --build-arg CONFIG_RTE_LIBRTE_IEEE1588=$COMPILE_WITH_PTP --build-arg http_proxy=$http_proxy --build-arg https_proxy=$http_proxy --build-arg HTTP_PROXY=$http_proxy --build-arg HTTPS_PROXY=$http_proxy --network=host"
-export Params="--build-arg CONFIG_RTE_LIBRTE_IEEE1588=$COMPILE_WITH_PTP --build-arg http_proxy=$http_proxy --build-arg https_proxy=$http_proxy --build-arg HTTP_PROXY=$http_proxy --build-arg HTTPS_PROXY=$http_proxy --network=host"
+export Params="--no-cache --build-arg CONFIG_RTE_LIBRTE_IEEE1588=$COMPILE_WITH_PTP --build-arg http_proxy=$http_proxy --build-arg https_proxy=$http_proxy --build-arg HTTP_PROXY=$http_proxy --build-arg HTTPS_PROXY=$http_proxy --network=host"
 
 buildIt() {
-    #echo docker build $Params --build-arg DPDK_VER=$dpdkVer --rm -t $DOCKER_REPO/$IMAGE_NAME:$dpdkVer .
-    docker build $Params --build-arg DPDK_VER=$dpdkVer --rm -t $DOCKER_REPO/$IMAGE_NAME:v$dpdkVer .
+    # make sure the local version of the base image is built first
+    # I have the base version to speed up subsequent builds
+    docker build -f Dockerfile.base -t dpdk-base:ubuntu-24.04 .
+    echo docker build -f Dockerfile.dpdk $Params --build-arg DPDK_VER=$dpdkVer --rm -t $DOCKER_REPO/$IMAGE_NAME:v$dpdkVer .
+    docker build -f Dockerfile.dpdk $Params --build-arg DPDK_VER=$dpdkVer --rm -t $DOCKER_REPO/$IMAGE_NAME:v$dpdkVer .
 }
  
 pushIt() {
+    echo "Pushing $DOCKER_REPO/$IMAGE_NAME:v$dpdkVer"
     docker push $DOCKER_REPO/$IMAGE_NAME:v$dpdkVer
 }
 

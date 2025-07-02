@@ -1,0 +1,20 @@
+# get base ubuntu image
+# I like ubuntu, easy to get packages
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+# update repos and install required packages
+RUN chsh -s /usr/bin/bash \
+    && echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections \
+    && apt-get install -y -q \
+    && chmod 777 /var/cache/debconf/ \
+    && chmod 777 /var/cache/debconf/passwords.dat \
+    && apt-get update \
+    && apt-get install apt-utils dialog -y \
+    && apt-get upgrade -y \
+    && echo "apt-get install linux-image-$(uname -r) -y" \
+    && apt-get autoremove -y 
+
+RUN packages="build-essential git python python3 pciutils meson libnuma-dev vim netperf sudo htop ethtool bash-completion libtool iproute2 python3-pyelftools iputils-ping net-tools pkg-config cmake libpcap-dev wget" \
+    && for i in $packages; do apt-get install --ignore-missing -y "$i"; done
+

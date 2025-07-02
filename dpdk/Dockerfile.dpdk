@@ -1,0 +1,41 @@
+# Stage 1: Build DPDK
+# use local base image
+FROM dpdk-base:ubuntu-24.04 as builder
+
+ARG DPDK_VER=v19.11
+ARG CONFIG_RTE_LIBRTE_IEEE1588='0'
+ENV RTE_SDK /root/dpdk
+
+WORKDIR /root
+
+RUN wget http://fast.dpdk.org/rel/dpdk-$DPDK_VER.tar.xz && \
+    tar xvf dpdk-$DPDK_VER.tar.xz && \
+    if [ -d dpdk-stable-$DPDK_VER ]; then mv dpdk-stable-$DPDK_VER dpdk; else mv dpdk-$DPDK_VER dpdk; fi && \
+    cd dpdk && \
+    sed -i "/i40e/a #define CONFIG_RTE_LIBRTE_IEEE1588 $CONFIG_RTE_LIBRTE_IEEE1588" config/rte_config.h && \
+    meson build && cd build && \
+    meson configure -Dexamples=all && \
+    ninja && ninja install && \
+    ldconfig
+
+# Stage 2: Minimal Runtime Image
+FROM ubuntu:24.04
+
+# get the needed runtime stuff, plus iproute2
+RUN apt-get update && apt-get install -y \
+    python3 iproute2 pciutils libnuma1 libpcap0.8 libatomic1 && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Copy only the necessary runtime files from the builder
+COPY --from=builder /usr/local/bin/dpdk-* /usr/local/bin/
+COPY --from=builder /usr/local/lib/ /usr/local/lib/
+COPY --from=builder /usr/local/include/ /usr/local/include/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libnuma.so* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/local/lib/x86_64-linux-gnu/dpdk/ /usr/local/lib/x86_64-linux-gnu/dpdk/
+RUN ldconfig && ln -s /usr/bin/python3 /usr/bin/python
+
+# Copy your launcher script
+COPY launcher.py /launcher.py
+RUN chmod +x /launcher.py
+
+ENTRYPOINT ["/launcher.py"]
