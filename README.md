@@ -6,4 +6,6 @@ This contains two folders, one for creating the containeried DPDK sample applica
 
 These resulting containers are on dockerhub under patrickkutch
 
-I make these for my own purposes, maybe they will be useful to you too
+I make these for my own purposes, maybe they will be useful to you too.
+
+There is a easy wrapper to launch the container with all of the mappings needed for DPDK in dpdkcon script file
