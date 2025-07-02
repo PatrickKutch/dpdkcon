@@ -1,0 +1,37 @@
+#!/bin/bash
+# This script wraps the docker run command, specifically designed for using containerized DPDK from patrickkutch/dpdk
+# It checks for an existing hugetlbfs mount and sets it up if not found.
+# I name it dpdkcon, make it executable with `chmod +x test.sh`, and place it in my PATH.
+
+ # Usage: this_script -it --rm patrickkutch/dpdk:v25.03 dpdk-testpmd -l 0-1 -n 4 -a 18:01.0 -- --nb-cores=1 --eth-peer=0,02:80:86:20:01:00 --forward=txonly -i
+
+# Function to find existing hugetlbfs mount
+find_huge_mount() {
+    awk '$3 == "hugetlbfs" { print $2; exit }' /proc/mounts
+}
+
+# Try to find an existing hugetlbfs mount
+HUGE_MOUNT=$(find_huge_mount)
+
+# If not found, create and mount at /mnt/huge
+if [ -z "$HUGE_MOUNT" ]; then
+    echo "No existing hugetlbfs mount found. Setting up at /mnt/huge..."
+    mkdir -p /mnt/huge
+    mount -t hugetlbfs nodev /mnt/huge
+    echo 2048 > /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages
+    echo 8196 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepages
+    echo 8196 > /sys/devices/system/node/node1/hugepages/hugepages-2048kB/nr_hugepages
+    HUGE_MOUNT="/mnt/huge"
+else
+    echo "Found existing hugetlbfs mount at $HUGE_MOUNT"
+fi
+
+# Run the container with the detected or created hugepage mount
+docker run --privileged --rm \
+    -v /dev/hugepages:/dev/hugepages \
+    -v /sys/bus/pci/devices:/sys/bus/pci/devices \
+    -v /sys/kernel/mm/hugepages:/sys/kernel/mm/hugepages \
+    -v /sys/devices/system/node:/sys/devices/system/node \
+    -v "$HUGE_MOUNT":"$HUGE_MOUNT" \
+    "$@"
+

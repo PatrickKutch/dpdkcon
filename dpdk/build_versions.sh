@@ -13,7 +13,7 @@
 #build a bunch of them
 DPDK_VERSIONS=("19.11" "20.02" "20.05" "20.08" "20.11" "21.02" "21.05" "21.11" "22.03")
 #if you only want to build a single image, then uncomment and do something like the following line
-DPDK_VERSIONS=("24.11") 
+DPDK_VERSIONS=("24.11.2") 
 #my repo, select your own
 DOCKER_REPO="patrickkutch"
 IMAGE_NAME="dpdk"
